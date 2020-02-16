@@ -6,12 +6,31 @@ import matplotlib.pyplot as plt
 plt.style.use('seaborn-whitegrid')
 
 class Graphs:
-    def __init__(self, ama, value_increase, mortgage, house, dp_payoff=None):
-        self.ama = ama
-        self.value_increase = value_increase
-        self.mortgage = mortgage
-        self.dp_payoff = dp_payoff
-        self.house = house
+    def __init__(self, mortgage):
+        self.mo = mortgage
+
+
+    def iter_through_items(self, row, width, items):
+        for i in range(len(items)):
+            if i > 0:
+                plt.bar(row, items[i], width, bottom=items[i-1])
+            else:
+                plt.bar(row, items[i], width)
+
+    def price_breakdown(self):
+        width=.25
+        breakdown = [max(self.mo.payments), mo.home_insurance, mo.management_fee, mo.finance_payment]
+        rent = plt.bar(0, mo.min_rent, width)
+
+        self.iter_through_items(1, width, breakdown)
+        if max(self.mo.payments) != min(self.mo.payments):
+            breakdown[0] = min(self.mo.payments)
+            self.iter_through_items(2, width, breakdown)
+
+        plt.title('rent breakdown')
+        plt.yticks('rent', 'breakdown')
+        plt.xticks(np.arange(0, mo.min_rent, 100))
+        plt.show()
 
     def amoritization(self):
         fig = plt.figure()
@@ -29,6 +48,3 @@ class Graphs:
         plt.xlabel('years')
         plt.ylabel('remaining-balance')
         plt.show()
-
-    def monthly_return(self, rent, mortgage, tax, insurance, excess_costs):
-        pass
