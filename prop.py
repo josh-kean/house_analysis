@@ -1,5 +1,3 @@
-from graphs import Graphs 
-
 #this program calculates the monthly payments on a house,
 #explores various financing scenarios, and determines the cash flow opportunity of a home
 
@@ -11,10 +9,11 @@ from graphs import Graphs
 #create 5 and 10 year cash out scenario
 
 class House:
-    def __init__(self, price, rooms, address, appreciation=1.05):
+    def __init__(self, price, rooms, rent, address, appreciation=1.05):
         self.price = price
         self.rooms = rooms
         self.address = address
+        self.rent = rent
         self.appreciation = appreciation
 
     def home_value(self, duration):
@@ -26,13 +25,14 @@ class House:
 class FinancialObject:
     def __init__(self, home, tax=None, home_insurance=0.015, closing_costs = 0.075, management_fee=0.05):
         self.home = home
-        self.loan_amount = None
+        self.loan_amount = 0
         self.closing_costs = closing_costs
         self.mortgage = None
-        self.finance_payment = None
-        self.down_payment = None
-        self.loan_insurance_payment = None
-        self.min_rent = None
+        self.finance_payment = 0
+        self.down_payment = 0
+        self.loan_insurance_payment = 0
+        self.min_rent = 0
+        self.coc = None
         self.home_insurance= home_insurance
         self.management_fee = management_fee
         self.ammoritization = []
@@ -42,6 +42,9 @@ class FinancialObject:
         self.home_insurance = self.home.price*self.home_insurance
         self.closing_costs = self.loan_amount*self.closing_costs
 
+    def cash_on_cash(self):
+        self.coc=(self.home.rent-self.mortgage-self.finance_payment-self.loan_insurance_payment-(self.home_insurance/12)-self.home.rent*self.management_fee)*12/(self.closing_costs+self.down_payment)
+
     #assuming a 30 year payment schedule unless otherwise stated
     def payment_calculation(self, loan, rate, period=360):
         return ((rate/12)*(loan))/(1-(1+rate/12)**-period)
@@ -49,10 +52,10 @@ class FinancialObject:
     def pay_down(self, rate, period, loan, payment, m):
             return (((1+rate/12)**m)*loan)-(((1+rate/12)**m)-1)*payment/(rate/12)
 
-    def min_rent_calc(self):
-        #want to return minimum rental rate to achieve 10% cash on cash
-        #rent = down_payment*.1+payment
-        self.min_rent = ((self.closing_costs+self.down_payment)*.1+(self.payments[0]+self.home_insurance/12+self.home_insurance))/(1-self.management_fee)
+    def min_rent_calc(self, coc=.1):
+        costs = self.mortgage+self.finance_payment+self.loan_insurance_payment
+        costs2 = coc*(self.down_payment+self.closing_costs)/12
+        self.min_rent = (costs+costs2)/(1-self.management_fee)
 
     def amoritize(self, rate, period, loan, rate2=None, period2=None, loan2=None):
         self.amoritization = []
@@ -60,7 +63,7 @@ class FinancialObject:
             paydown = self.pay_down(rate, period, loan, self.mortgage, m)
             if loan2 and m < period2+1:
                 paydown += self.pay_down(rate2, period2, loan2, self.finance_payment, m)
-            self.amoritization.append(paydown)
+            self.ammoritization.append(paydown)
 
     def loan_insurance(self, rate, period):
         #apply loan insurance to payments if down_payment is less than 20% of purchase price
@@ -79,13 +82,14 @@ class FinancialObject:
     def down_unfinanced(self, dp=0.2, rate=0.05, period=360): 
         self.down_payment = self.home.price*(dp)
         self.loan_amount = self.home.price - self.down_payment
-        self.finance_payment = None
+        self.finance_payment = 0
         self.mortgage = self.payment_calculation(self.home.price-self.down_payment, rate, period)
         self.payments = [self.mortgage for x in range(period)]
         if dp < .2:
             self.loan_insurance(rate, period)
         self.amoritize(rate, period, self.loan_amount)
         self.final_costs()
+        self.cash_on_cash()
         self.min_rent_calc()
 
     #assuming 5% rate for all calculations unless provdied otherwise
@@ -103,4 +107,5 @@ class FinancialObject:
             self.loan_insurance(rate, period)
         self.amoritize(rate, period, self.loan_amount, dp_rate, dp_period, self.down_payment)
         self.final_costs()
+        self.cash_on_cash()
         self.min_rent_calc()
