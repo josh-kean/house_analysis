@@ -12,12 +12,15 @@ class Graphs:
 
     def expense_breakdown(self, save_loc, fo):
         fo = fo
-        labels = ['mortgage', 'insurance', 'management', 'tax', 'profit']
+        labels = ['mortgage', 'home\ninsurance', 'management\nfee', 'property tax', 'profit']
         costs = [fo.mortgage, fo.home_insurance/12, fo.home.rent*fo.management_fee, fo.home.tax]
         costs.append(fo.home.rent-sum(costs))
-        explode=(0.0, 0.0, 0.0, 0.0, 0.1)
+        explode=(0.1, 0.1, 0.1, 0.1, 0.1)
         fig1, ax1 = plt.subplots()
-        ax1.pie(costs, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
+        def func(pct, allvals):
+            absolute = int(pct/100.*np.sum(allvals))
+            return "{:.1f}%\n{:d}$".format(pct, absolute)
+        ax1.pie(costs, explode=explode, labels=labels, autopct=lambda pct: func(pct, costs), shadow=True, startangle=90)
         ax1.axis('equal')
         plt.savefig(os.path.join(save_loc, 'cost_dist.png'))
         plt.close()

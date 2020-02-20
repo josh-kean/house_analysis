@@ -89,5 +89,5 @@ def create_reports():
     for home in homes:
         house = House(home[0], home[2], home[3], home[4], home[6])
         fo = FinancialObject(house)
-        report = Reports()
-        report.create_report(home, fo)
+        report = Reports(house, fo)
+        report.create_report()
