@@ -7,36 +7,24 @@ import os
 plt.style.use('seaborn-whitegrid')
 
 class Graphs:
-    def __init__(self, mortgage):
+    def __init__(self):
         pass
 
-    def iter_through_items(self, row, width, items):
-        for i in range(len(items)):
-            if i > 0:
-                plt.bar(row, items[i], width, bottom=items[i-1])
-            else:
-                plt.bar(row, items[i], width)
+    def expense_breakdown(self, save_loc, fo):
+        fo = fo
+        labels = ['mortgage', 'insurance', 'management', 'tax', 'profit']
+        costs = [fo.mortgage, fo.home_insurance/12, fo.home.rent*fo.management_fee, fo.home.tax]
+        costs.append(fo.home.rent-sum(costs))
+        explode=(0.0, 0.0, 0.0, 0.0, 0.1)
+        fig1, ax1 = plt.subplots()
+        ax1.pie(costs, explode=explode, labels=labels, autopct='%1.1f%%', shadow=True, startangle=90)
+        ax1.axis('equal')
+        plt.savefig(os.path.join(save_loc, 'cost_dist.png'))
+        plt.close()
 
-    def price_breakdown(self, save_loc):
-        fig = plt.figure()
-        width=.25
-        breakdown = [max(self.mo.payments), self.mo.home_insurance, self.mo.management_fee, self.mo.finance_payment]
-        rent = plt.bar(0, self.mo.min_rent, width)
-
-        self.iter_through_items(1, width, breakdown)
-        if max(self.mo.payments) != min(self.mo.payments):
-            breakdown[0] = min(self.mo.payments)
-            self.iter_through_items(2, width, breakdown)
-
-        plt.title('rent breakdown')
-        plt.yticks('rent', 'breakdown')
-        plt.xticks(np.arange(0, mo.min_rent, 100))
-        plt.savefig(os.path.join(save_loc,'breakdown.png'))
-        plt.show()
 
     def amoritization(self, save_loc, fo):
         fo = fo
-        fo.down_unfinanced()
         fig = plt.figure()
         ama_data = np.array([[x, fo.ammoritization[x]] for x in range(len(fo.ammoritization))])
         value_data = np.array([[x, fo.home.price*(1.05)**(x/12)] for x in range(len(fo.ammoritization))])

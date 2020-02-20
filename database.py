@@ -6,27 +6,23 @@ class Table:
         pass
 
     def homes_table(self):
-        conn, curs = self.start_table()
-        tblcmd = 'create table if not exists homes (price int(8), rooms int(3), estrent int(6), addr char(50), min_rent int(6))'
+        conn = sqlite3.connect('house', isolation_level=None)
+        curs = conn.cursor()
+        tblcmd = 'create table if not exists homes (price int(8), cash_on_cash int(4), rooms int(3), estrent int(6), addr char(50), min_rent int(6), property_tax int(6))'
         curs.execute(tblcmd)
         conn.close()
 
-    def start_table(self):
-        self.homes_table()
+    def add_home(self, home): #home is list [price, rooms, rent, address, property_tax]
         conn = sqlite3.connect('house', isolation_level=None)
         curs = conn.cursor()
-        return conn, curs
-
-    def add_home(self, home): #home is list [price, rooms, rent, address]
-        conn = sqlite3.connect('house', isolation_level=None)
-        curs = conn.cursor()
-        curs.execute('INSERT INTO homes (price, rooms, estrent, addr) VALUES (?, ?, ?, ?)', home)
+        curs.execute('INSERT INTO homes (price, rooms, estrent, addr, property_tax) VALUES (?, ?, ?, ?, ?)', home)
         conn.commit()
         conn.close()
 
     def add_homes(self, homes): #for adding multiple homes
-        conn, curs = self.start_table()
-        curs.executemany('INSERT INTO homes VALUES (?, ?, ?, ?)', homes)
+        conn = sqlite3.connect('house', isolation_level=None)
+        curs = conn.cursor()
+        curs.executemany('INSERT INTO homes VALUES (?, ?, ?, ?, ?)', homes)
         conn.commit()
         conn.close()
 
@@ -64,8 +60,11 @@ class Table:
 
     def delete_entire_table(self, password):
         if password == 'super secret password':
-            conn, curs = self.start_table()
+            conn = sqlite3.connect('house', isolation_level=None)
+            curs = conn.cursor()
             curs.execute('delete from homes')
+            conn.commit()
+            conn.close()
         else:
             print('wrong password')
 

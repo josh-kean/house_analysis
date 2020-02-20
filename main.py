@@ -27,11 +27,11 @@ def populate_database(file_name):
         table.add_home(house)
 
 
-def actuals(house, appreciate=1.05):
+def actuals(home, appreciate=1.05):
     if appreciate !=1.05:
-        h = House(house[0], house[1], house[2], house[3], appreciate)
+        h = House(home[0], home[2], home[3], home[4], home[6], appreciate)
     else:
-        h = House(house[0], house[1], house[2], house[3])
+        h = House(home[0], home[2], home[3], home[4], home[6])
     fo = FinancialObject(h)
     fo.down_unfinanced()
     return fo.min_rent, fo.coc
@@ -42,12 +42,14 @@ def determine_actuals():
     homes = table.get_table()
     for home in homes:
         rent, coc = actuals(home)
-        table.add_min_rent(rent, home[3])
-        table.add_cash_on_cash(coc, home[3])
+        table.add_min_rent(rent, home[4])
+        table.add_cash_on_cash(coc, home[4])
 
 def create_folder(name): #input address as name
     #if folder exists, do nothing, else, create new folder
     folder_name = os.path.join('homes', name)
+    if os.path.exists('homes') != True:
+        os.makedirs('homes')
     if os.path.exists(folder_name) != True:
         os.makedirs(os.path.join(folder_name))
     if os.path.exists(os.path.join(folder_name, 'graphs')) != True:
@@ -57,9 +59,11 @@ def create_graphs(name, fo):
     #create and save graphs to graphs folder
     folder_name = os.path.join('homes', name)
     folder = os.path.join(folder_name, 'graphs')
-    graphs = Graphs(fo)
-    #graphs.price_breakdown(folder)
+    graphs = Graphs()
+    fo = fo
+    fo.down_unfinanced()
     graphs.amoritization(folder, fo)
+    graphs.expense_breakdown(folder, fo)
 
 def pickle_home(name, financial_object):
     folder_name = os.path.join('homes', name)
@@ -71,19 +75,19 @@ def pickle_home(name, financial_object):
 def save_homes():
     table = Table()
     homes = table.get_table()
-    for home in homes:
-        house = House(home[0], home[1], home[2], home[3])
+    for home in homes: #address is item 4
+        house = House(home[0], home[2], home[3], home[4], home[6])
         fo = FinancialObject(house)
-        create_folder(home[3])
-        pickle_home(home[3], fo)
-        create_graphs(home[3], fo)
+        create_folder(home[4])
+        pickle_home(home[4], fo)
+        create_graphs(home[4], fo)
 
 
 def create_reports():
     table = Table()
     homes = table.get_table()
     for home in homes:
-        house = House(home[0], home[1], home[2], home[3])
+        house = House(home[0], home[2], home[3], home[4], home[6])
         fo = FinancialObject(house)
         report = Reports()
         report.create_report(home, fo)

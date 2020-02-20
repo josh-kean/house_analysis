@@ -8,12 +8,13 @@ class Reports:
 
     def text_report(self, house, fo):
         price = house[0]
-        rooms = house[1]
-        rent = house[2]
-        addr = house[3]
+        rooms = house[2]
+        rent = house[3]
+        addr = house[4]
         mcost = fo.mortgage+fo.home_insurance/12+rent*fo.management_fee
         ccost = fo.closing_costs
         coc = fo.coc
+        apr = fo.mo_rate
         loan = fo.loan_amount
         amr = fo.ammoritization
         dp = fo.down_payment
@@ -21,7 +22,7 @@ class Reports:
         year10 = house[0]*(1.05)**(10)-amr[120]
         s1 = f'{addr} is a {rooms} bedroom home listed for a price of {price}.'
         s2 = f'A 20% down payment of {round(dp,2)} will be required and the closing costs are estimated'
-        s3 = f'to be {round(ccost,2)}. The monthly costs are estimated to be {round(mcost,2)}'
+        s3 = f'to be {round(ccost,2)}. The loan amount is {loan} which will have an apr of {apr*100}%. The monthly costs are estimated to be {round(mcost,2)}'
         s4 = f'and the market rate for this unit is {rent}, provding a monthly income of'
         s5 = f'{round(rent-mcost, 2)}. The cash on cash return for this unit is estimated to be {round(coc*100,2)}%.'
         return f'{s1} {s2} {s3} {s4} {s5}'
@@ -30,7 +31,7 @@ class Reports:
     def create_report(self, house, fo):
         fo = fo
         fo.down_unfinanced()
-        name = house[3]
+        name = house[4]
         report_name = os.path.join('homes', name, f'{name}.pdf')
         pdf = FPDF(unit='in', format='letter')
         pdf.add_page()

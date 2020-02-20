@@ -9,12 +9,13 @@
 #create 5 and 10 year cash out scenario
 
 class House:
-    def __init__(self, price, rooms, rent, address, appreciation=1.05):
+    def __init__(self, price, rooms, rent, address, tax, appreciation=1.05):
         self.price = price
         self.rooms = rooms
         self.address = address
         self.rent = rent
         self.appreciation = appreciation
+        self.tax = tax
 
     def home_value(self, duration):
         #returns a list of home value increase over duration (in years)
@@ -23,11 +24,12 @@ class House:
 
 #only down_financed and down_unfinanced should ever be called from the outside
 class FinancialObject:
-    def __init__(self, home, tax=None, home_insurance=0.015, closing_costs = 0.075, management_fee=0.05):
+    def __init__(self, home, tax=None, mo_rate=0.05, home_insurance=0.015, closing_costs = 0.075, management_fee=0.05):
         self.home = home
         self.loan_amount = 0
         self.closing_costs = closing_costs
         self.mortgage = None
+        self.mo_rate = mo_rate
         self.finance_payment = 0
         self.down_payment = 0
         self.loan_insurance_payment = 0
@@ -79,15 +81,15 @@ class FinancialObject:
 
     #assuming a 5% rate for all calculations unless provided otherwise
     #assuming 20% down, can change
-    def down_unfinanced(self, dp=0.2, rate=0.05, period=360): 
+    def down_unfinanced(self, dp=0.2, period=360): 
         self.down_payment = self.home.price*(dp)
         self.loan_amount = self.home.price - self.down_payment
         self.finance_payment = 0
-        self.mortgage = self.payment_calculation(self.home.price-self.down_payment, rate, period)
+        self.mortgage = self.payment_calculation(self.home.price-self.down_payment, self.mo_rate, period)
         self.payments = [self.mortgage for x in range(period)]
         if dp < .2:
-            self.loan_insurance(rate, period)
-        self.amoritize(rate, period, self.loan_amount)
+            self.loan_insurance(self.mo_rate, period)
+        self.amoritize(self.mo_rate, period, self.loan_amount)
         self.final_costs()
         self.cash_on_cash()
         self.min_rent_calc()
