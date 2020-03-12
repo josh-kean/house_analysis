@@ -35,17 +35,16 @@ class FinancialObject:
         self.loan_insurance_payment = 0
         self.min_rent = 0
         self.coc = None
-        self.home_insurance= home_insurance
+        self.home_insurance= self.home.price*home_insurance/12
         self.management_fee = management_fee
         self.ammoritization = []
         self.payments = []
 
     def final_costs(self):
-        self.home_insurance = self.home.price*self.home_insurance
         self.closing_costs = self.loan_amount*self.closing_costs
 
     def cash_on_cash(self):
-        self.coc=(self.home.rent-self.mortgage-self.finance_payment-self.loan_insurance_payment-(self.home_insurance/12)-self.home.rent*self.management_fee)*12/(self.closing_costs+self.down_payment)
+        self.coc=(self.home.rent-self.mortgage-self.finance_payment-self.loan_insurance_payment-(self.home_insurance)-self.home.rent*self.management_fee)*12/(self.closing_costs+self.down_payment)
 
     #assuming a 30 year payment schedule unless otherwise stated
     def payment_calculation(self, loan, rate, period=360):

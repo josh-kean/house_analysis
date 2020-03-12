@@ -1,3 +1,4 @@
+import copy
 import numpy as np
 import pandas as pd
 import matplotlib as mpl
@@ -11,7 +12,8 @@ class Graphs:
         pass
 
     def expense_breakdown(self, save_loc, fo):
-        fo = fo
+        fo = copy.deepcopy(fo)
+        fo.down_unfinanced()
         labels = ['mortgage', 'home\ninsurance', 'management\nfee', 'property tax', 'profit']
         costs = [fo.mortgage, fo.home_insurance/12, fo.home.rent*fo.management_fee, fo.home.tax]
         costs.append(fo.home.rent-sum(costs))
@@ -25,9 +27,31 @@ class Graphs:
         plt.savefig(os.path.join(save_loc, 'cost_dist.png'))
         plt.close()
 
+    def various_rates(self, save_loc, fo):
+        rates = [3,4,5,6,7,8]
+        rates_formatted = [f'{x}%' for x in rates]
+        profits = []
+        for rate in rates:
+            temp_fo = copy.deepcopy(fo)
+            temp_fo.mo_rate = rate/100
+            temp_fo.down_unfinanced()
+            profit = temp_fo.home.rent-sum([temp_fo.mortgage, temp_fo.home_insurance, temp_fo.home.rent*temp_fo.management_fee, temp_fo.home.tax])
+            profits.append(int(profit))
+        rates_formatted.append('loc')
+        y_pos = np.arange(len(rates_formatted))
+        final_fo = copy.deepcopy(fo)
+        profits.append(int(final_fo.payment_calculation(final_fo.down_payment, 0.08, 60)))
+        plt.bar(y_pos, profits);
+        plt.xticks(y_pos, rates_formatted)
+        plt.xlabel = ('profit')
+        plt.ylabel = ('annual rate')
+        plt.title('Profit v Interest Rate')
+        plt.savefig(os.path.join(save_loc, 'profit-rates.png'))
+
 
     def amoritization(self, save_loc, fo):
-        fo = fo
+        temp_f = copy.deepcopy(fo)
+        fo.down_unfinanced()
         fig = plt.figure()
         ama_data = np.array([[x, fo.ammoritization[x]] for x in range(len(fo.ammoritization))])
         value_data = np.array([[x, fo.home.price*(1.05)**(x/12)] for x in range(len(fo.ammoritization))])

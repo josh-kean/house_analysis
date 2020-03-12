@@ -55,32 +55,44 @@ def create_folder(name): #input address as name
     if os.path.exists(os.path.join(folder_name, 'graphs')) != True:
         os.makedirs(os.path.join(folder_name, 'graphs'))
 
-def create_graphs(name, fo):
+def create_graphs(name, fo, test=False):
     #create and save graphs to graphs folder
-    folder_name = os.path.join('homes', name)
+    check = lambda x: 'test-' if test else ''
+    folder_name = os.path.join(f'{check(test)}homes', name)
     folder = os.path.join(folder_name, 'graphs')
     graphs = Graphs()
     fo = fo
-    fo.down_unfinanced()
     graphs.amoritization(folder, fo)
     graphs.expense_breakdown(folder, fo)
+    graphs.various_rates(folder, fo)
 
-def pickle_home(name, financial_object):
+def pickle_home(name, financial_object, test=False):
+    check = lambda x: 'test-' if test else ''
     folder_name = os.path.join('homes', name)
     pkl = os.path.join(folder_name, f'{name}.pkl')
     F = open(pkl, 'wb')
     pickle.dump(financial_object, F)
     F.close()
 
-def save_homes():
+def save_homes(test=False):
     table = Table()
     homes = table.get_table()
     for home in homes: #address is item 4
         house = House(home[0], home[2], home[3], home[4], home[6])
         fo = FinancialObject(house)
-        create_folder(home[4])
-        pickle_home(home[4], fo)
-        create_graphs(home[4], fo)
+        create_folder(home[4], test)
+        pickle_home(home[4], fo, test)
+        create_graphs(home[4], fo, test)
+
+def sorted_table():
+    table = Table()
+    table.filter_by_coc()
+    table.filter_by_price()
+    homes = table.sort_by_coc()
+    csv_file = open(os.path.join('tables', 'houses.csv'), 'w')
+    csv_writet = csv.writer(csv_file)
+    for home in homes:
+        csv_writer.writerow(home)
 
 
 def create_reports():
@@ -91,3 +103,36 @@ def create_reports():
         fo = FinancialObject(house)
         report = Reports(house, fo)
         report.create_report()
+
+
+def city_table(city):
+    table = Table()
+    table.filter_by_coc()
+    table.filter_by_price()
+    homes = table.filter_by_city(city)
+    csv_file = open(f'{city}_sorted.csv','w')
+    csv_writer = csv.writer(csv_file)
+    for home in homes:
+        csv_writer.writerow(home)
+
+def filter_main(table_name, city=None, coc=None, finance=None):
+    table = Table()
+    homes = table.filter_all(city=city, coc=coc, finance=finance)
+    cityName = lambda x: f'{x}' if x else ''
+    cocName = lambda x: f'coc_{x}' if x else ''
+    financeName = lambda x: f'
+    csv_file = open(f'{city}
+
+
+
+def test_new_features():
+    #this only calculates info for first house in list
+    table = Table()
+    home = table.get_table()[4]
+    house = House(home[0], home[2], home[3], home[4], home[6])
+    fo = FinancialObject(house)
+    title = f'test-{home[4]}'
+    create_folder(title)
+    create_graphs(title, fo)
+    report = Reports(house, fo)
+    report.create_report(True)
